@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MHT CET AI Percentile Predictor</title>
+
+  <!-- Inter + Poppins look (clean, student-focused) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      /* Brand palette tuned to your site (copied from college predictor) */
+      --brand: #e6403a;
+      --brand-600:#d8352e;
+      --brand-soft:#fff1f0;
+      --ink:#111827;
+      --muted:#6b7280;
+      --bg:#f7f8fb;
+      --card:#ffffff;
+      --stroke:#e5e7eb;
+      --ring:#cfe2ff;
+      --success:#10b981;
+    }
+
+    *{ box-sizing: border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Top bar (same as college predictor) */
+    .topbar{
+      position:sticky; top:0; z-index:10;
+      background:#fff;
+      border-bottom:1px solid var(--stroke);
+      backdrop-filter: blur(8px);
+    }
+    .topbar-inner{
+      max-width:1200px; margin:0 auto; padding:14px 20px;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:12px;
+    }
+    .brand-badge{
+      display:flex; align-items:center; gap:12px;
+      font-weight:700; color:#1f2937;
+    }
+    .badge{
+      width:34px; height:34px; border-radius:10px;
+      background:var(--brand); color:#fff; display:grid; place-items:center;
+      font-family:Poppins, Inter, sans-serif; font-weight:600;
+      letter-spacing:0.2px;
+      box-shadow:0 6px 20px rgba(230,64,58,.25);
+    }
+    .site-link{
+      margin-left:auto;
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 14px; border-radius:999px;
+      background:var(--brand-soft); color:var(--brand); text-decoration:none; font-weight:600;
+      border:1px solid #ffd6d3;
+    }
+    .site-link:hover{ background:#ffe6e4; }
+
+    /* Shell */
+    .wrap{ max-width:1200px; margin:30px auto; padding:0 20px; }
+    .card{
+      background:var(--card);
+      border:1px solid var(--stroke);
+      border-radius:14px;
+      box-shadow:0 20px 60px rgba(16,24,40,.06);
+      padding:26px;
+    }
+
+    .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    @media (max-width: 900px){ .grid-2{ grid-template-columns:1fr; } }
+
+    h1{
+      margin:0 0 18px 0;
+      font-family:Poppins, Inter, sans-serif;
+      font-size:26px; font-weight:700; letter-spacing:.2px;
+    }
+
+    label{
+      font-weight:600; color:#374151; display:block; margin:10px 0 8px;
+    }
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    select{
+      width:100%;
+      padding:13px 14px;
+      border:1px solid var(--stroke);
+      background:#fff;
+      border-radius:10px; font-size:15px; color:#1f2937;
+      outline:none;
+      transition:border .2s, box-shadow .2s, background .2s;
+    }
+    input::placeholder{ color:#9ca3af; }
+    input:focus,select:focus{
+      border-color:#bcd3ff; box-shadow:0 0 0 4px var(--ring);
+      background:#fff;
+    }
+    .help{ font-size:12.5px; color:var(--muted); margin-top:6px; }
+    .error{ color:#dc2626; font-size:13px; margin-top:6px; }
+
+    .btn{
+      appearance:none; border:none; cursor:pointer;
+      padding:12px 16px; border-radius:10px; font-weight:700;
+      transition:.2s transform, .2s box-shadow, .2s background;
+    }
+    .btn-primary{
+      background:var(--brand); color:#fff; box-shadow:0 10px 18px rgba(230,64,58,.25); margin-top: 50px;
+    }
+    .btn-primary:hover{ background:var(--brand-600); transform:translateY(-1px); }
+    .btn-ghost{ background:transparent; color:#0d6efd; }
+    .btn[disabled]{ opacity:.7; cursor:not-allowed; }
+
+    .header-row{
+      display:flex; align-items:center; gap:14px; justify-content:space-between; flex-wrap:wrap;
+    }
+    .greeting{
+      border:1px dashed #fecaca;
+      background:var(--brand-soft);
+      color:#b91c1c; padding:12px 14px;
+      border-radius:10px; margin:10px 0 16px;
+      font-weight:600;
+    }
+    .inline{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+
+    /* Centered content inside predictor for the single input */
+    .predictor-inner{
+      max-width:480px;
+      margin-top:10px;
+    }
+
+    #result{
+      margin-top:16px;
+      font-size:16px;
+      font-weight:600;
+      color:#111827;
+    }
+  </style>
+</head>
+<body>
+  <!-- Top bar (same visual as college predictor) -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-badge">
+        <div class="badge">CS</div>
+        <div>MHT CET Percentile Predictor</div>
+      </div>
+      <a class="site-link" href="#" onclick="return false;">College Simplified</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- STUDENT DETAILS (gate) -->
+    <section id="detailsSection" class="card" style="display:none;">
+      <h1>Enter Student Details</h1>
+      <form id="detailsForm" novalidate>
+        <div class="grid-2">
+          <div>
+            <label for="studentName">Full Name</label>
+            <input id="studentName" type="text" placeholder="e.g., Mohammed Ibrahim Shaikh" />
+            <div id="errName" class="error"></div>
+          </div>
+          <div>
+            <label for="studentEmail">Email</label>
+            <input id="studentEmail" type="email" placeholder="e.g., name@example.com" />
+            <div id="errEmail" class="error"></div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <label for="studentMobile">Mobile Number</label>
+            <input id="studentMobile" type="tel" inputmode="numeric" maxlength="10" placeholder="10-digit Indian mobile" />
+            <div class="help">We’ll use this to share prediction updates.</div>
+            <div id="errMobile" class="error"></div>
+          </div>
+          <div>
+            <label for="studentState">State</label>
+            <select id="studentState">
+              <option value="">Select State</option>
+            </select>
+            <div id="errState" class="error"></div>
+          </div>
+        </div>
+
+        <div>
+          <label for="studentCity">City</label>
+          <input id="studentCity" type="text" placeholder="e.g., Pune" />
+          <div id="errCity" class="error"></div>
+        </div>
+
+        <div class="inline" style="margin-top:14px">
+          <button id="saveContinueBtn" class="btn btn-primary" type="submit">Save & Continue</button>
+          <span class="help">By continuing, you consent to store your details for counseling and updates.</span>
+        </div>
+      </form>
+    </section>
+
+    <!-- PERCENTILE PREDICTOR -->
+    <section id="predictorSection" class="card" style="display:none;">
+      <div class="header-row">
+        <h1>AI-Powered MHT CET Percentile Predictor</h1>
+        <button id="editDetailsBtn" class="btn btn-ghost" type="button">Edit details</button>
+      </div>
+
+      <div id="helloBanner" class="greeting" style="display:none;"></div>
+
+      <div class="predictor-inner">
+        <label for="marksInput">Enter your CGPA (0 – 10)</label>
+        <input
+          type="number"
+          id="cgpaInput"
+          min="0"
+          max="10"
+          placeholder="Enter your marks (0–10)…"
+        />
+        <button id="predictBtn" class="btn btn-primary" type="button">Predict My Percentile</button>
+        <p id="result"></p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    /* ---------- CONFIG: Google Apps Script URL (same as college predictor) ---------- */
+    const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyt4ySHVQ3i4qI6trhDqGkQuZTMbv6cYkSrr4bFi_yk0RoqjgVGuT1gN6ZW8-lipytYBw/exec";
+
+    /* ---------- India State list (copied from college predictor) ---------- */
+    const statesIN = [
+      "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat",
+      "Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra",
+      "Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu",
+      "Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal",
+      "Andaman and Nicobar Islands","Chandigarh",
+      "Dadra and Nagar Haveli and Daman and Diu","Delhi",
+      "Jammu and Kashmir","Ladakh","Lakshadweep","Puducherry"
+    ];
+
+    function fillStates(){
+      const sel = document.getElementById('studentState');
+      statesIN.forEach(s=>{
+        const o = document.createElement('option');
+        o.value=s; o.textContent=s;
+        sel.appendChild(o);
+      });
+    }
+
+    /* ---------- Local storage helpers ---------- */
+    const LS_KEY = "studentDetails";
+    const getDetails = () => {
+      try { return JSON.parse(localStorage.getItem(LS_KEY)); } catch { return null; }
+    };
+    const saveDetailsLocal = (d) => localStorage.setItem(LS_KEY, JSON.stringify(d));
+
+    /* ---------- Validate details (same rules as college predictor) ---------- */
+    function validateDetails(){
+      const name   = document.getElementById('studentName').value.trim();
+      const email  = document.getElementById('studentEmail').value.trim();
+      const mobile = document.getElementById('studentMobile').value.trim();
+      const state  = document.getElementById('studentState').value.trim();
+      const city   = document.getElementById('studentCity').value.trim();
+
+      ['errName','errEmail','errMobile','errState','errCity'].forEach(id=>document.getElementById(id).textContent='');
+
+      let ok=true;
+      if(!name){
+        document.getElementById('errName').textContent='Please enter your name.';
+        ok=false;
+      }
+      const emailOK=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+      if(!emailOK){
+        document.getElementById('errEmail').textContent='Please enter a valid email.';
+        ok=false;
+      }
+      const mobileOK=/^[6-9]\d{9}$/.test(mobile);
+      if(!mobileOK){
+        document.getElementById('errMobile').textContent='Enter a valid 10-digit Indian mobile number.';
+        ok=false;
+      }
+      if(!state){
+        document.getElementById('errState').textContent='Select your state.';
+        ok=false;
+      }
+      if(!city){
+        document.getElementById('errCity').textContent='Enter your city.';
+        ok=false;
+      }
+
+      return ok ? {name,email,mobile,state,city} : null;
+    }
+
+    /* ---------- POST to Google Sheet (used for details + percentile predictions) ---------- */
+    async function postToSheet(payload, source){
+      const body = JSON.stringify({ ...payload, source, ua:navigator.userAgent });
+      await fetch(WEBAPP_URL, { method:'POST', mode:'no-cors', body });
+      // brief pause gives Apps Script time to append
+      await new Promise(r=>setTimeout(r,400));
+      return true;
+    }
+
+    /* ---------- Your original percentile data & logic (unchanged) ---------- */
+    const percentileData = [
+    { range: [9.5, 10], percentage: "90% - 100%" },
+    { range: [9, 9.5], percentage: "85% - 90%" },
+    { range: [8.5, 9], percentage: "80% - 85%" },
+    { range: [8, 8.5], percentage: "75% - 80%" },
+    { range: [7.5, 8], percentage: "70% - 75%" },
+    { range: [7, 7.5], percentage: "65% - 70%" },
+    { range: [6.5, 7], percentage: "60% - 65%" },
+    { range: [6, 6.5], percentage: "55% - 60%" },
+    { range: [5.5, 6], percentage: "50% - 55%" },
+    { range: [5, 5.5], percentage: "45% - 50%" },
+    { range: [4.5, 5], percentage: "40% - 45%" },
+    { range: [0, 4.5], percentage: "Below 40%" }, 
+    ];
+
+    async function predictPercentile(){
+      const cgpaInput = document.getElementById("cgpaInput");
+      const resultEl   = document.getElementById("result");
+      const cgpa = parseInt(cgpaInput.value, 10);
+
+      let resultText = "Please enter a valid score between 0 and 10.";
+      let predictedPercentile = "";
+
+      if (!isNaN(cgpa) && cgpa >= 0 && cgpa <= 10) {
+        for (let data of percentileData) {
+          if (cgpa >= data.range[0] && cgpa <= data.range[1]) {
+            predictedPercentile = data.percentage;
+            resultText = `Predicted Percentile: ${data.percentage}`;
+            break;
+          }
+        }
+      }
+
+      resultEl.innerText = resultText;
+
+      // Log this prediction (if student details exist)
+      const det = getDetails();
+      if(det && !isNaN(cgpa) && cgpa >= 0 && cgpa <= 10){
+        try{
+          await postToSheet({
+            ...det,
+            cgpa: cgpa,
+            predictedPercentile
+          }, "percentile_prediction");
+        }catch(e){
+          console.warn("Could not log percentile prediction", e);
+        }
+      }
+    }
+
+    /* ---------- UI toggles (same gate behaviour as college predictor) ---------- */
+    function showPredictor(details){
+      const banner = document.getElementById('helloBanner');
+      banner.textContent = `Hi ${details.name}! We’ll personalize insights for ${details.city}, ${details.state}.`;
+      banner.style.display = 'block';
+      document.getElementById('detailsSection').style.display='none';
+      document.getElementById('predictorSection').style.display='block';
+    }
+
+    function showDetailsForm(prefill){
+      document.getElementById('predictorSection').style.display='none';
+      document.getElementById('detailsSection').style.display='block';
+      if(prefill){
+        document.getElementById('studentName').value   = prefill.name   || "";
+        document.getElementById('studentEmail').value  = prefill.email  || "";
+        document.getElementById('studentMobile').value = prefill.mobile || "";
+        document.getElementById('studentState').value  = prefill.state  || "";
+        document.getElementById('studentCity').value   = prefill.city   || "";
+      }
+    }
+
+    /* ---------- Boot ---------- */
+    document.addEventListener('DOMContentLoaded', ()=>{
+      fillStates();
+
+      const existing = getDetails();
+      if(existing && existing.name && existing.email && existing.mobile && existing.state && existing.city){
+        showPredictor(existing);
+      }else{
+        showDetailsForm(existing || {});
+      }
+
+      const form = document.getElementById('detailsForm');
+      const btn  = document.getElementById('saveContinueBtn');
+      form.addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const data = validateDetails();
+        if(!data) return;
+
+        const original = btn.textContent;
+        btn.disabled = true; btn.textContent = "Saving…";
+        try{
+          await postToSheet(data, "details");
+          saveDetailsLocal(data);
+          showPredictor(data);
+        }catch(err){
+          alert("Could not save your details. Please try again.");
+        }finally{
+          btn.disabled = false; btn.textContent = original;
+        }
+      });
+
+      document.getElementById('editDetailsBtn').addEventListener('click', ()=>{
+        showDetailsForm(getDetails() || {});
+      });
+
+      document.getElementById('predictBtn').addEventListener('click', predictPercentile);
+    });
+  </script>
+</body>
+</html>
