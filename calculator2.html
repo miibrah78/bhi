@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MHT CET AI Percentile Predictor</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --brand:#e6403a;
+      --brand-600:#d8352e;
+      --brand-soft:#fff1f0;
+      --ink:#111827;
+      --muted:#6b7280;
+      --bg:#f7f8fb;
+      --card:#ffffff;
+      --stroke:#e5e7eb;
+      --ring:#cfe2ff;
+      --success:#10b981;
+    }
+
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      font-family:Inter, system-ui;
+    }
+
+    .topbar{
+      position:sticky; top:0; z-index:10;
+      background:#fff;
+      border-bottom:1px solid var(--stroke);
+    }
+    .topbar-inner{
+      max-width:1200px; margin:0 auto; padding:14px 20px;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .badge{
+      width:34px; height:34px; border-radius:10px;
+      background:var(--brand); color:#fff; display:grid; place-items:center;
+      font-weight:600;
+      box-shadow:0 6px 20px rgba(230,64,58,.25);
+    }
+    .site-link{
+      background:var(--brand-soft); color:var(--brand);
+      padding:8px 14px; border-radius:999px; text-decoration:none;
+      border:1px solid #ffd6d3;
+    }
+
+    .wrap{ max-width:1200px; margin:30px auto; padding:0 20px; }
+    .card{
+      background:var(--card);
+      border:1px solid var(--stroke);
+      border-radius:14px;
+      box-shadow:0 20px 60px rgba(16,24,40,.06);
+      padding:26px;
+    }
+
+    h1{
+      margin:0 0 18px 0;
+      font-family:Poppins, Inter, sans-serif;
+      font-size:26px; font-weight:700;
+    }
+
+    input, select{
+      width:100%;
+      box-sizing: border-box;
+      padding:13px 14px;
+      border:1px solid var(--stroke);
+      border-radius:10px; font-size:15px;
+      margin-bottom:15px;
+    }
+
+    .btn{
+      appearance:none; border:none; cursor:pointer;
+      padding:12px 16px; border-radius:10px; font-weight:700;
+      background:var(--brand); color:#fff;
+      box-shadow:0 10px 18px rgba(230,64,58,.25);
+      margin-top:10px;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div class="badge">CS</div>
+        <div>MHT CET Percentile Predictor</div>
+      </div>
+      <a class="site-link" href="#" onclick="return false;">College Simplified</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+
+    <section id="predictorSection" class="card">
+      <h1>AI-Powered CGPA / Percentage Converter</h1>
+
+      <!-- Input value -->
+      <label>Enter Value (CGPA or Percentage)</label>
+      <input type="number" id="inputValue" placeholder="Enter value…"/>
+
+      <!-- Convert Type -->
+      <label>Choose Conversion</label>
+      <select id="conversionType">
+        <option value="cgpaToPercent">CGPA → Percentage</option>
+        <option value="percentToCgpa">Percentage → CGPA</option>
+      </select>
+
+      <!-- Scale selection (only for CGPA→Percent) -->
+      <label id="scaleLabel">Choose Scale</label>
+      <select id="scaleSelect">
+        <option value="10">Scale 10</option>
+        <option value="4">Scale 4</option>
+      </select>
+
+      <button id="predictBtn" class="btn" type="button">Convert</button>
+      <p id="result"></p>
+    </section>
+
+  </main>
+
+<script>
+  const conversionType = document.getElementById("conversionType");
+  const scaleSelect = document.getElementById("scaleSelect");
+  const scaleLabel = document.getElementById("scaleLabel");
+
+  // Hide scale when Percentage → CGPA
+  conversionType.addEventListener("change", () => {
+    if(conversionType.value === "percentToCgpa"){
+      scaleSelect.style.display = "none";
+      scaleLabel.style.display = "none";
+    } else {
+      scaleSelect.style.display = "block";
+      scaleLabel.style.display = "block";
+    }
+  });
+
+  function convert(){
+    const value = parseFloat(document.getElementById("inputValue").value);
+    const type = conversionType.value;
+    const scale = scaleSelect.value;
+    const resultEl = document.getElementById("result");
+
+    if(isNaN(value)){
+      resultEl.innerText = "Please enter a valid number.";
+      return;
+    }
+
+    let result;
+
+    // CGPA → Percentage
+    if(type === "cgpaToPercent"){
+      if(scale == 10){
+        result = (value * 10).toFixed(2) + "%";
+      } else {
+        result = (value * 25).toFixed(2) + "%";
+      }
+    }
+
+    // Percentage → CGPA
+    if(type === "percentToCgpa"){
+      if(value > 100 || value < 0){
+        resultEl.innerText = "Percentage must be between 0 and 100.";
+        return;
+      }
+
+      result = (value / 10).toFixed(2);
+
+      // If user wants CGPA on 4 scale
+      // formula = % / 25
+      // Let user decide later if needed
+    }
+
+    resultEl.innerText = "Converted Value: " + result;
+  }
+
+  document.getElementById("predictBtn").addEventListener("click", convert);
+</script>
+
+</body>
+</html>
